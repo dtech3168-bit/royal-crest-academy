@@ -59,12 +59,16 @@ async function getRecentAdmissions(req, res) {
         id,
         application_number,
 
+        passport_photo,
+
         CONCAT(
           first_name,
           ' ',
           COALESCE(CONCAT(other_name, ' '), ''),
           last_name
         ) AS applicant_name,
+
+        gender,
 
         parent_email,
         desired_class,

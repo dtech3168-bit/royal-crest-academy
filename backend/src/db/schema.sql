@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS admission_applications (
         'female'
     ) NOT NULL,
 
+    passport_photo VARCHAR(255),
+
     desired_class VARCHAR(100) NOT NULL,
 
     previous_school VARCHAR(200),

@@ -5,6 +5,9 @@ import {
 } from 'lucide-react'
 
 function Topbar({ user }) {
+  const initials = user?.name
+    ? user.name.trim().split(/\s+/).slice(0, 2).map(n => n[0]).join('').toUpperCase()
+    : 'P'
 
   return (
     <header className="dashboard-topbar">
@@ -56,7 +59,7 @@ function Topbar({ user }) {
         <div className="dashboard-profile">
 
           <div className="dashboard-avatar">
-            {user?.name?.charAt(0) || 'P'}
+            {initials}
           </div>
 
           <ChevronDown size={14} />

@@ -12,6 +12,7 @@ import Academics from './components/Academics'
 import CampusLife from './components/CampusLife'
 import SchoolStats from './components/SchoolStats'
 import Admissions from './pages/Admissions'
+import CreateActivity from './pages/CreateActivity'
 
 import Login from './pages/Login'
 

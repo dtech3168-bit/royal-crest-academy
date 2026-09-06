@@ -67,98 +67,80 @@ function closePopup() {
 
 
   async function handleSubmit(event) {
+  event.preventDefault()
 
-    event.preventDefault()
+  setLoading(true)
+  setSuccess(false)
 
-    setLoading(true)
-    setSuccess(false)
+  try {
+    const submissionData = new FormData()
 
-    try {
+    Object.entries(formData).forEach(([key, value]) => {
+      submissionData.append(key, value)
+    })
 
-      const submissionData = new FormData()
+    if (passportPhoto) {
+      submissionData.append('passportPhoto', passportPhoto)
+    }
 
-    Object.entries(formData).forEach(
-      ([key, value]) => {
-        submissionData.append(key, value)
+    console.log('Selected passport photo:', passportPhoto)
+    console.log(
+      'FormData passport photo:',
+      submissionData.get('passportPhoto')
+    )
+
+    const response = await fetch(
+      'http://localhost:5000/api/admissions/apply',
+      {
+        method: 'POST',
+        body: submissionData,
       }
     )
 
-    if (passportPhoto) {
-      submissionData.append(
-        'passportPhoto',
-        passportPhoto
+    const data = await response.json()
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.message || 'Unable to submit application.'
       )
     }
 
-      const response = await fetch(
-        'http://localhost:5000/api/admissions/apply',
-        {
-          method: 'POST',
-          
+    setApplicationNumber(data.applicationNumber)
+    setSuccess(true)
 
-          headers: {
-            'Content-Type': 'application/json',
-          },
+    setFormData({
+      firstName: '',
+      lastName: '',
+      otherName: '',
+      dateOfBirth: '',
+      gender: '',
+      desiredClass: '',
+      previousSchool: '',
+      parentName: '',
+      parentPhone: '',
+      parentEmail: '',
+      parentRelationship: '',
+      address: '',
+    })
 
-          body: JSON.stringify(formData),
-        }
-      )
+    setPassportPhoto(null)
 
+  } catch (error) {
+    console.error(
+      'Application submission error:',
+      error
+    )
 
-      const data = await response.json()
+    showPopup(
+      'error',
+      'Application Failed',
+      error.message
+    )
 
-
-      if (!response.ok || !data.success) {
-        throw new Error(
-          data.message ||
-          'Unable to submit application.'
-        )
-      }
-
-
-      setApplicationNumber(
-        data.applicationNumber
-      )
-
-      setSuccess(true)
-
-      setFormData({
-        firstName: '',
-        lastName: '',
-        otherName: '',
-        dateOfBirth: '',
-        gender: '',
-        desiredClass: '',
-        previousSchool: '',
-        parentName: '',
-        parentPhone: '',
-        parentEmail: '',
-        parentRelationship: '',
-        address: '',
-      })
-
-
-    } catch (error) {
-
-      console.error(
-        'Application submission error:',
-        error
-      )
-
-      showPopup(
-  'error',
-  'Application Failed',
-  error.message
-)
-
-
-    } finally {
-
-      setLoading(false)
-
-    }
-
+  } finally {
+    setLoading(false)
   }
+}
 
 
   if (success) {

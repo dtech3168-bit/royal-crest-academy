@@ -26,6 +26,9 @@ async function submitApplication(req, res) {
       address,
     } = req.body
 
+    console.log('Admission body:', req.body)
+    console.log('Uploaded file:', req.file)
+
     const passportPhoto = req.file
       ? `uploads/students/${req.file.filename}`
       : null

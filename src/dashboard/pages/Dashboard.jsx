@@ -29,83 +29,119 @@ function Dashboard({ user }) {
 
   useEffect(() => {
 
-  async function loadDashboard() {
 
-    const token = localStorage.getItem('token')
+    async function refreshToken(oldToken) {
+      if (!oldToken) return null
 
-    console.log('Dashboard token:', token)
-
-    try {
-
-      const [statsResponse, admissionsResponse] = await Promise.all([
-
-        fetch(
-          'http://localhost:5000/api/dashboard/stats',
+      try {
+        const res = await fetch(
+          'http://localhost:5000/api/auth/refresh',
           {
+            method: 'POST',
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${oldToken}`,
+              'Content-Type': 'application/json',
             },
           }
-        ),
-
-        fetch(
-          'http://localhost:5000/api/dashboard/recent-admissions',
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        ),
-
-      ])
-
-
-      const statsData = await statsResponse.json()
-      console.log('Dashboard stats:', statsData)
-        const admissionsData = await admissionsResponse.json()
-
-
-        if (!statsResponse.ok || !statsData.success) {
-          throw new Error(
-            statsData.message ||
-            'Unable to load dashboard statistics.'
-          )
-        }
-
-
-        if (!admissionsResponse.ok || !admissionsData.success) {
-          throw new Error(
-            admissionsData.message ||
-            'Unable to load recent admissions.'
-          )
-        }
-
-
-        setStats(statsData.stats)
-
-        setRecentAdmissions(
-          admissionsData.applications
         )
 
+        if (!res.ok) return null
 
-      } catch (error) {
+        const data = await res.json()
+        if (data && data.success && data.token) {
+          localStorage.setItem('token', data.token)
+          return data.token
+        }
 
-        console.error(
-          'Dashboard loading error:',
-          error
-        )
-
-      } finally {
-
-        setLoading(false)
-        setAdmissionsLoading(false)
-
+        return null
+      } catch (err) {
+        console.error('Token refresh failed:', err)
+        return null
       }
-
     }
 
+    async function doFetchWithRetry() {
+      let token = localStorage.getItem('token')
 
-    loadDashboard()
+      console.log('Dashboard token:', token)
+
+      try {
+        const [statsResponse, admissionsResponse] = await Promise.all([
+          fetch('http://localhost:5000/api/dashboard/stats', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch('http://localhost:5000/api/dashboard/recent-admissions', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ])
+
+        // If either returned 401, attempt refresh and retry once
+        if (
+          statsResponse.status === 401 ||
+          admissionsResponse.status === 401
+        ) {
+          const newToken = await refreshToken(token)
+          if (newToken) {
+            token = newToken
+            const [statsResponse2, admissionsResponse2] = await Promise.all([
+              fetch('http://localhost:5000/api/dashboard/stats', {
+                headers: { Authorization: `Bearer ${token}` },
+              }),
+              fetch('http://localhost:5000/api/dashboard/recent-admissions', {
+                headers: { Authorization: `Bearer ${token}` },
+              }),
+            ])
+
+            const statsData = await statsResponse2.json()
+            const admissionsData = await admissionsResponse2.json()
+
+            if (!statsResponse2.ok || !statsData.success) {
+              throw new Error(statsData.message || 'Unable to load dashboard statistics.')
+            }
+
+            if (!admissionsResponse2.ok || !admissionsData.success) {
+              throw new Error(admissionsData.message || 'Unable to load recent admissions.')
+            }
+
+            setStats(statsData.stats)
+            setRecentAdmissions(admissionsData.applications)
+            return
+          }
+        }
+
+        // Normal path when first responses are ok
+        const statsData = await statsResponse.json()
+        console.log('Dashboard stats:', statsData)
+        const admissionsData = await admissionsResponse.json()
+
+        if (!statsResponse.ok || !statsData.success) {
+          throw new Error(statsData.message || 'Unable to load dashboard statistics.')
+        }
+
+        if (!admissionsResponse.ok || !admissionsData.success) {
+          throw new Error(admissionsData.message || 'Unable to load recent admissions.')
+        }
+
+        setStats(statsData.stats)
+        setRecentAdmissions(admissionsData.applications)
+      } catch (error) {
+        console.error('Dashboard loading error:', error)
+      } finally {
+        setLoading(false)
+        setAdmissionsLoading(false)
+      }
+    }
+
+    // initial load
+    doFetchWithRetry()
+
+    // refresh token every 30s
+    const interval = setInterval(() => {
+      const t = localStorage.getItem('token')
+      if (t) refreshToken(t)
+    }, 30000)
+
+    return () => clearInterval(interval)
 
   }, [])
 
@@ -608,6 +644,9 @@ function Dashboard({ user }) {
 ) : (
 
   recentAdmissions.map((application) => {
+
+    console.log('Admission application:', application)
+console.log('Passport photo:', application.passport_photo)
 
     const initials = application.applicant_name
       .split(' ')
