@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+
 import {
   Users,
   GraduationCap,
@@ -10,6 +11,7 @@ import {
 
 import StatCard from '../components/StatCard'
 
+import StudentAvatar from '../../components/StudentAvatar'
 
 function Dashboard({ user }) {
 
@@ -624,9 +626,12 @@ function Dashboard({ user }) {
 
         <div className="student-info">
 
-          <div className="student-avatar">
-            {initials}
-          </div>
+          <StudentAvatar
+      photo={application.passport_photo}
+      gender={application.gender}
+      name={application.applicant_name}
+      size="small"
+    />
 
           <div>
 
