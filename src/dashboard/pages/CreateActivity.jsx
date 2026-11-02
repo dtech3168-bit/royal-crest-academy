@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, CalendarDays, Clock, MapPin, Send } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import Popup from '../components/Popup'
+import Popup from '../../components/Popup'
 
 function CreateActivity() {
   const navigate = useNavigate()

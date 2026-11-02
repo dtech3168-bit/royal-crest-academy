@@ -3,35 +3,31 @@ function StatCard({
   value,
   description,
   icon: Icon,
+  onClick,
 }) {
   return (
-    <article className="dashboard-stat-card">
+    <button
+      type="button"
+      className="dashboard-stat-card"
+      onClick={onClick}
+      disabled={!onClick}
+    >
+      <div className="stat-card-top">
+        <div className="stat-card-icon">
+          <Icon size={20} />
+        </div>
 
-      <div className="stat-card-icon">
-        <Icon size={20} strokeWidth={1.8} />
+        <span className="stat-card-arrow">↗</span>
       </div>
 
-      <div className="stat-card-info">
+      <strong className="stat-card-value">
+        {value}
+      </strong>
 
-        <span className="stat-card-title">
-          {title}
-        </span>
+      <h3>{title}</h3>
 
-        <strong className="stat-card-value">
-          {value}
-        </strong>
-
-        <span className="stat-card-description">
-          {description}
-        </span>
-
-      </div>
-
-      <div className="stat-card-arrow">
-        ↗
-      </div>
-
-    </article>
+      <p>{description}</p>
+    </button>
   )
 }
 

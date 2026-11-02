@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 
 import {
@@ -183,11 +184,12 @@ function Dashboard({ user }) {
       icon={Users}
     />
 
-    <StatCard
+        <StatCard
       title="Teachers"
       value={loading ? '—' : stats.teachers}
       description="Teaching staff"
       icon={GraduationCap}
+      onClick={() => navigate('/dashboard/teachers')}
     />
 
     <StatCard
@@ -497,7 +499,10 @@ function Dashboard({ user }) {
 
   <div className="quick-actions-grid">
 
-    <button className="quick-action-card">
+    <button
+      className="quick-action-card"
+      onClick={() => navigate('/dashboard/teachers')}
+    >
 
       <div className="quick-action-icon">
         <UserPlus size={20} />

@@ -3388,3 +3388,18 @@
   color: #0d1b2a;
   font-size: 13px;
 }
+
+.stat-card-clickable {
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.stat-card-clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(13, 27, 42, .09);
+}
+
+.stat-card-clickable:focus-visible {
+  outline: 2px solid #b08d3c;
+  outline-offset: 4px;
+}
